@@ -5,12 +5,27 @@ ThisBuild / version := "0.1.0-SNAPSHOT"
 ThisBuild / organization := "com.example"
 ThisBuild / organizationName := "example"
 
+lazy val akkaVersion = "2.6.8"
+lazy val akkaGrpcVersion = "1.0.1"
+enablePlugins(AkkaGrpcPlugin)
+
 lazy val root = (project in file("."))
   .settings(
     name := "akka-grpc-playground",
-    libraryDependencies += scalaTest % Test
+    libraryDependencies ++= Seq(
+      "com.typesafe.akka" %% "akka-actor-typed" % akkaVersion,
+      "com.typesafe.akka" %% "akka-stream" % akkaVersion,
+      "com.typesafe.akka" %% "akka-discovery" % akkaVersion,
+      "com.typesafe.akka" %% "akka-pki" % akkaVersion,
+      "com.typesafe.akka" %% "akka-actor-testkit-typed" % akkaVersion % Test,
+      "com.typesafe.akka" %% "akka-stream-testkit" % akkaVersion % Test,
+      scalaTest % Test
+    )
   )
-
+  .enablePlugins(JavaAgent)
+  .settings(
+    javaAgents += "org.mortbay.jetty.alpn" % "jetty-alpn-agent" % "2.0.10" % "runtime"
+  )
 // Uncomment the following for publishing to Sonatype.
 // See https://www.scala-sbt.org/1.x/docs/Using-Sonatype.html for more detail.
 
