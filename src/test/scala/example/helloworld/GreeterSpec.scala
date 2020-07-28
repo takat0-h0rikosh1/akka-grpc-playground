@@ -1,13 +1,13 @@
 //#full-example
-package com.example.helloworld
+package example.helloworld
 
 import akka.actor.testkit.typed.scaladsl.ActorTestKit
 import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
 import akka.grpc.GrpcClientSettings
-
+import com.example.helloworld.{GreeterServiceClient, HelloReply, HelloRequest}
 import com.typesafe.config.ConfigFactory
-
+import example.helloworld.GreeterServer
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
@@ -16,15 +16,17 @@ import org.scalatest.wordspec.AnyWordSpec
 import scala.concurrent.duration._
 
 class GreeterSpec
-  extends AnyWordSpec
-  with BeforeAndAfterAll
-  with Matchers
-  with ScalaFutures {
+    extends AnyWordSpec
+    with BeforeAndAfterAll
+    with Matchers
+    with ScalaFutures {
 
-  implicit val patience: PatienceConfig = PatienceConfig(scaled(5.seconds), scaled(100.millis))
+  implicit val patience: PatienceConfig =
+    PatienceConfig(scaled(5.seconds), scaled(100.millis))
 
   // important to enable HTTP/2 in server ActorSystem's config
-  val conf = ConfigFactory.parseString("akka.http.server.preview.enable-http2 = on")
+  val conf = ConfigFactory
+    .parseString("akka.http.server.preview.enable-http2 = on")
     .withFallback(ConfigFactory.defaultApplication())
 
   val testKit = ActorTestKit(conf)
@@ -35,12 +37,15 @@ class GreeterSpec
   // make sure server is bound before using client
   bound.futureValue
 
-  implicit val clientSystem: ActorSystem[_] = ActorSystem(Behaviors.empty, "GreeterClient")
+  implicit val clientSystem: ActorSystem[_] =
+    ActorSystem(Behaviors.empty, "GreeterClient")
 
   val client =
-    GreeterServiceClient(GrpcClientSettings.fromConfig("helloworld.GreeterService"))
+    GreeterServiceClient(
+      GrpcClientSettings.fromConfig("helloworld.GreeterService")
+    )
 
-  override def afterAll: Unit = {
+  override def afterAll(): Unit = {
     ActorTestKit.shutdown(clientSystem)
     testKit.shutdownTestKit()
   }
